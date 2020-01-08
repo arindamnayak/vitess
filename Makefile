@@ -37,6 +37,12 @@ ifdef VT_EXTRA_BUILD_FLAGS
 export EXTRA_BUILD_FLAGS := $(VT_EXTRA_BUILD_FLAGS)
 endif
 
+# This target needs to be manually run every time any file within web/vtctld2/app is modified to regenerate rice-box.go
+embed_static: 
+	cd go/vt/vtctld
+	go run github.com/GeertJohan/go.rice/rice embed-go
+	go build .
+
 build_web:
 	echo $$(date): Building web artifacts
 	cd web/vtctld2 && ng build -prod
@@ -104,8 +110,6 @@ unit_test_race: build dependency_check
 e2e_test_race: build
 	tools/e2e_test_race.sh
 
-e2e_test_cluster: build
-	tools/e2e_test_cluster.sh
 
 .ONESHELL:
 SHELL = /bin/bash
@@ -156,9 +160,13 @@ endif
 $(PROTO_PY_OUTS): py/vtproto/%_pb2.py: proto/%.proto
 	$(PROTOC_COMMAND) -Iproto $< --python_out=py/vtproto --grpc_python_out=py/vtproto
 
+# TODO(sougou): find a better way around this temp hack.
+VTTOP=$(VTROOT)/../../..
 $(PROTO_GO_OUTS): install_protoc-gen-go proto/*.proto
 	for name in $(PROTO_SRC_NAMES); do \
-		cd $(VTROOT)/src && PATH=$(VTROOT)/bin:$(PATH) $(VTROOT)/bin/protoc --go_out=plugins=grpc:. -Ivitess.io/vitess/proto vitess.io/vitess/proto/$${name}.proto; \
+		cd $(VTTOP)/src && \
+		$(VTROOT)/bin/protoc --go_out=plugins=grpc:. -Ivitess.io/vitess/proto vitess.io/vitess/proto/$${name}.proto && \
+		goimports -w $(VTROOT)/go/vt/proto/$${name}/$${name}.pb.go; \
 	done
 
 # Helper targets for building Docker images.
