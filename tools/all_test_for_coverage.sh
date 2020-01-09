@@ -60,11 +60,9 @@ echo "--------- executing endtoend testcases ---------"
 cluster_tests=$(echo "$packages_with_all_tests" | grep -E "go/test/endtoend" | cut -d" " -f1)
 
 # Run cluster test sequentially
-counter=0
 for i in $cluster_tests
 do
    echo "starting test for $i"
    go test  $i -v -p=1 -is-coverage=true || :
-   counter=$((counter+1))
 done
 

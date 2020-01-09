@@ -1,5 +1,8 @@
 name: sonar_analysis
-on: [push]
+on:
+  push:
+    branches:
+      - master
 jobs:
 
   build:
@@ -33,6 +36,7 @@ jobs:
       - name: Publish coverage to codecov.com
         run: |
           find report -type f -name '*.out' -exec cat {} + >> coverage.txt
+          ls -l  coverage.txt | cut -d " " -f5 
           bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
