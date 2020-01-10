@@ -80,7 +80,7 @@ func (vtctl *VtctlProcess) ExecuteCommandWithOutput(args ...string) (result stri
 		"-topo_global_server_address", vtctl.TopoGlobalAddress,
 		"-topo_global_root", vtctl.TopoGlobalRoot}, args...)
 	if *isCoverage {
-		args = append([]string{"-test.coverprofile=" + getCoveragePath("vtctl-exec-cmd.out", true), "-test.v"}, args...)
+		args = append([]string{"-test.coverprofile=" + getCoveragePath("vtctl-"+args[0]+".out", false), "-test.v"}, args...)
 	}
 	tmpProcess := exec.Command(
 		vtctl.Binary,
