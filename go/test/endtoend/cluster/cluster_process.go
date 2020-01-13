@@ -37,7 +37,8 @@ const (
 )
 
 var (
-	keepData = flag.Bool("keep-data", false, "don't delete the per-test VTDATAROOT subfolders")
+	keepData   = flag.Bool("keep-data", false, "don't delete the per-test VTDATAROOT subfolders")
+	isCoverage = flag.Bool("is-coverage", false, "whether coverage is required")
 )
 
 // LocalProcessCluster Testcases need to use this to iniate a cluster
@@ -611,4 +612,12 @@ func (cluster *LocalProcessCluster) StartVttablet(tablet *Vttablet, servingStatu
 	tablet.VttabletProcess.SupportsBackup = supportBackup
 	tablet.VttabletProcess.ServingStatus = servingStatus
 	return tablet.VttabletProcess.Setup()
+}
+
+func getCoveragePath(fileName string) string {
+	covDir := os.Getenv("COV_DIR")
+	if covDir == "" {
+		covDir = os.TempDir()
+	}
+	return path.Join(covDir, fileName)
 }
