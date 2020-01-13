@@ -48,21 +48,11 @@ func TestVtctldProcess(t *testing.T) {
 
 	url = fmt.Sprintf("http://%s:%d/api/topodata/", clusterInstance.Hostname, clusterInstance.VtctldHTTPPort)
 
-	t.Run("Test topo data API", func(t *testing.T) {
-		testTopoDataAPI(t, url)
-	})
-	t.Run("Test list all tablets cmd", func(t *testing.T) {
-		testListAllTablets(t)
-	})
-	t.Run("Test tablet status", func(t *testing.T) {
-		testTabletStatus(t)
-	})
-	t.Run("Test ExecuteAsDba", func(t *testing.T) {
-		testExecuteAsDba(t)
-	})
-	t.Run("Test ExecuteAsApp", func(t *testing.T) {
-		testExecuteAsApp(t)
-	})
+	testTopoDataAPI(t, url)
+	testListAllTablets(t)
+	testTabletStatus(t)
+	testExecuteAsDba(t)
+	testExecuteAsApp(t)
 }
 
 func testTopoDataAPI(t *testing.T, url string) {

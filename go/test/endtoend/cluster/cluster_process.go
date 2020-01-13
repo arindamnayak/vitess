@@ -197,7 +197,6 @@ func (cluster *LocalProcessCluster) StartKeyspace(keyspace Keyspace, shardNames 
 
 	log.Info("Starting keyspace : " + keyspace.Name)
 	_ = cluster.VtctlProcess.CreateKeyspace(keyspace.Name)
-	println("starting keyspace")
 	var mysqlctlProcessList []*exec.Cmd
 	for _, shardName := range shardNames {
 		shard := &Shard{

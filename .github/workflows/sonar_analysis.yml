@@ -1,5 +1,8 @@
 name: sonar_analysis
-on: [push]
+on:
+  push:
+    branches:
+      - 'master'
 jobs:
 
   build:
@@ -24,18 +27,11 @@ jobs:
           sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
           go mod download
 
-      - name: Execute cluster endtoend test
+      - name: Execute unit test and cluster endtoend test
         run: |
           eatmydata -- ./tools/all_test_for_coverage.sh
           mkdir report
           cp /tmp/*.out ./report/.
-
-      - name: Publish coverage to codecov.com
-        run: |
-          find report -type f -name '*.out' -exec cat {} + >> coverage.txt
-          bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN}
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Analyse sonar
         run: |
@@ -44,7 +40,7 @@ jobs:
           rm -rf $SONAR_SCANNER_HOME
           mkdir -p $SONAR_SCANNER_HOME
           curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
-          unzip $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+          unzip $HOME/.sonar/sonar-sct Analysisanner.zip -d $HOME/.sonar/
           rm $HOME/.sonar/sonar-scanner.zip
           export PATH=$SONAR_SCANNER_HOME/bin:$PATH
           export SONAR_SCANNER_OPTS="-server"
