@@ -71,7 +71,7 @@ func (vtctld *VtctldProcess) Setup(cell string, extraArgs ...string) (err error)
 		"-pid_file", vtctld.PidFile,
 	)
 	if *isCoverage {
-		vtctld.proc.Args = append(vtctld.proc.Args, "-test.coverprofile="+getCoveragePath("vtctld.out", false))
+		vtctld.proc.Args = append(vtctld.proc.Args, "-test.coverprofile="+getCoveragePath("vtctld.out"))
 	}
 	vtctld.proc.Args = append(vtctld.proc.Args, extraArgs...)
 

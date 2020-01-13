@@ -49,7 +49,7 @@ func (mysqlctl *MysqlctlProcess) InitDb() (err error) {
 		"init",
 		"-init_db_sql_file", mysqlctl.InitDBFile}
 	if *isCoverage {
-		args = append([]string{"-test.coverprofile=" + getCoveragePath("mysql-initdb.out", false), "-test.v"}, args...)
+		args = append([]string{"-test.coverprofile=" + getCoveragePath("mysql-initdb.out"), "-test.v"}, args...)
 	}
 	tmpProcess := exec.Command(
 		mysqlctl.Binary,
@@ -75,7 +75,7 @@ func (mysqlctl *MysqlctlProcess) StartProcess() (*exec.Cmd, error) {
 		"-mysql_port", fmt.Sprintf("%d", mysqlctl.MySQLPort),
 	)
 	if *isCoverage {
-		tmpProcess.Args = append(tmpProcess.Args, []string{"-test.coverprofile=" + getCoveragePath("mysql-start.out", false)}...)
+		tmpProcess.Args = append(tmpProcess.Args, []string{"-test.coverprofile=" + getCoveragePath("mysql-start.out")}...)
 	}
 
 	if len(mysqlctl.ExtraArgs) > 0 {
@@ -106,7 +106,7 @@ func (mysqlctl *MysqlctlProcess) StopProcess() (*exec.Cmd, error) {
 		"-tablet_uid", fmt.Sprintf("%d", mysqlctl.TabletUID),
 	)
 	if *isCoverage {
-		tmpProcess.Args = append(tmpProcess.Args, []string{"-test.coverprofile=" + getCoveragePath("mysql-stop.out", false)}...)
+		tmpProcess.Args = append(tmpProcess.Args, []string{"-test.coverprofile=" + getCoveragePath("mysql-stop.out")}...)
 	}
 	if len(mysqlctl.ExtraArgs) > 0 {
 		tmpProcess.Args = append(tmpProcess.Args, mysqlctl.ExtraArgs...)

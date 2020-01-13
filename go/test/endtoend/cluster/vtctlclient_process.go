@@ -65,7 +65,7 @@ func (vtctlclient *VtctlClientProcess) ExecuteCommand(args ...string) (err error
 	pArgs := []string{"-server", vtctlclient.Server}
 
 	if *isCoverage {
-		pArgs = append(pArgs, "-test.coverprofile="+getCoveragePath("vtctlclient-exec-cmd.out", true), "-test.v")
+		pArgs = append(pArgs, "-test.coverprofile="+getCoveragePath("vtctlclient-"+args[0]+".out"), "-test.v")
 	}
 	pArgs = append(pArgs, args...)
 	tmpProcess := exec.Command(
@@ -81,7 +81,7 @@ func (vtctlclient *VtctlClientProcess) ExecuteCommand(args ...string) (err error
 func (vtctlclient *VtctlClientProcess) ExecuteCommandWithOutput(args ...string) (result string, err error) {
 	pArgs := []string{"-server", vtctlclient.Server}
 	if *isCoverage {
-		pArgs = append(pArgs, "-test.coverprofile="+getCoveragePath("vtctlclient-exec-cmd-output.out", true), "-test.v")
+		pArgs = append(pArgs, "-test.coverprofile="+getCoveragePath("vtctlclient-"+args[0]+".out"), "-test.v")
 	}
 	pArgs = append(pArgs, args...)
 	tmpProcess := exec.Command(

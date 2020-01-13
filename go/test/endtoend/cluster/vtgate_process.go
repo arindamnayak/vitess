@@ -84,7 +84,7 @@ func (vtgate *VtgateProcess) Setup() (err error) {
 		"-pid_file", vtgate.PidFile,
 	)
 	if *isCoverage {
-		vtgate.proc.Args = append(vtgate.proc.Args, "-test.coverprofile="+getCoveragePath("vtgate.out", false))
+		vtgate.proc.Args = append(vtgate.proc.Args, "-test.coverprofile="+getCoveragePath("vtgate.out"))
 	}
 
 	vtgate.proc.Args = append(vtgate.proc.Args, vtgate.ExtraArgs...)

@@ -25,7 +25,6 @@ import (
 	"os/exec"
 	"path"
 	"strconv"
-	"strings"
 	"time"
 
 	"vitess.io/vitess/go/vt/log"
@@ -616,17 +615,10 @@ func (cluster *LocalProcessCluster) StartVttablet(tablet *Vttablet, servingStatu
 	return tablet.VttabletProcess.Setup()
 }
 
-func getCoveragePath(fileName string, isDynamic bool) string {
+func getCoveragePath(fileName string) string {
 	covDir := os.Getenv("COV_DIR")
 	if covDir == "" {
 		covDir = os.TempDir()
 	}
-	filePath := path.Join(covDir, fileName)
-	if isDynamic {
-		filePath = path.Join(covDir, fmt.Sprintf("%s-%d.%s",
-			strings.Split(fileName, ".")[0],
-			getRandomNumber(1000000, 0),
-			strings.Split(fileName, ".")[1]))
-	}
-	return filePath
+	return path.Join(covDir, fileName)
 }

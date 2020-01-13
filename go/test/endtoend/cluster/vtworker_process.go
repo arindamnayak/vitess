@@ -144,7 +144,7 @@ func (vtworker *VtworkerProcess) ExecuteCommand(args ...string) (err error) {
 	args = append([]string{"-vtworker_client_protocol", "grpc",
 		"-server", vtworker.Server, "-log_dir", vtworker.LogDir, "-stderrthreshold", "info"}, args...)
 	if *isCoverage {
-		args = append([]string{"-test.coverprofile=" + getCoveragePath("vtworkerclient-exec-cmd.out", true)}, args...)
+		args = append([]string{"-test.coverprofile=" + getCoveragePath("vtworkerclient-exec-cmd.out")}, args...)
 	}
 	tmpProcess := exec.Command(
 		"vtworkerclient",
@@ -169,7 +169,7 @@ func (vtworker *VtworkerProcess) ExecuteVtworkerCommand(port int, grpcPort int, 
 		"-cell", vtworker.Cell,
 		"-log_dir", vtworker.LogDir, "-stderrthreshold", "1"}, args...)
 	if *isCoverage {
-		args = append([]string{"-test.coverprofile=" + getCoveragePath("vtworker-exec-cmd.out", true)}, args...)
+		args = append([]string{"-test.coverprofile=" + getCoveragePath("vtworker-exec-cmd.out")}, args...)
 	}
 	tmpProcess := exec.Command(
 		"vtworker",
