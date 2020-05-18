@@ -200,9 +200,9 @@ func (se *Engine) reload(ctx context.Context) error {
 		return err
 	}
 	tableData, err := conn.Exec(ctx, mysql.BaseShowTables, maxTableCount, false)
-	if err != nil {
-		return err
-	}
+	//if err != nil {
+	//	return err
+	//}
 
 	rec := concurrency.AllErrorRecorder{}
 	// curTables keeps track of tables in the new snapshot so we can detect what was dropped.
@@ -211,29 +211,31 @@ func (se *Engine) reload(ctx context.Context) error {
 	changedTables := make(map[string]*Table)
 	// created and altered contain the names of created and altered tables for broadcast.
 	var created, altered []string
-	for _, row := range tableData.Rows {
-		tableName := row[0].ToString()
-		curTables[tableName] = true
-		createTime, _ := evalengine.ToInt64(row[2])
-		if _, ok := se.tables[tableName]; ok && createTime < se.lastChange {
-			continue
-		}
-		log.Infof("Reading schema for table: %s", tableName)
+	if tableData != nil {
+		for _, row := range tableData.Rows {
+			tableName := row[0].ToString()
+			curTables[tableName] = true
+			createTime, _ := evalengine.ToInt64(row[2])
+			if _, ok := se.tables[tableName]; ok && createTime < se.lastChange {
+				continue
+			}
+			log.Infof("Reading schema for table: %s", tableName)
 
-		table, err := LoadTable(conn, tableName, row[1].ToString(), row[3].ToString())
-		if err != nil {
-			rec.RecordError(err)
-			continue
+			table, err := LoadTable(conn, tableName, row[1].ToString(), row[3].ToString())
+			if err != nil {
+				rec.RecordError(err)
+				continue
+			}
+			changedTables[tableName] = table
+			if _, ok := se.tables[tableName]; ok {
+				altered = append(altered, tableName)
+			} else {
+				created = append(created, tableName)
+			}
 		}
-		changedTables[tableName] = table
-		if _, ok := se.tables[tableName]; ok {
-			altered = append(altered, tableName)
-		} else {
-			created = append(created, tableName)
+		if rec.HasErrors() {
+			return rec.Error()
 		}
-	}
-	if rec.HasErrors() {
-		return rec.Error()
 	}
 
 	// Compute and handle dropped tables.
@@ -247,9 +249,9 @@ func (se *Engine) reload(ctx context.Context) error {
 	}
 
 	// Populate PKColumns for changed tables.
-	if err := se.populatePrimaryKeys(ctx, conn, changedTables); err != nil {
-		return err
-	}
+	//if err := se.populatePrimaryKeys(ctx, conn, changedTables); err != nil {
+	//	return err
+	//}
 
 	// Update se.tables and se.lastChange
 	for k, t := range changedTables {
@@ -262,7 +264,7 @@ func (se *Engine) reload(ctx context.Context) error {
 }
 
 func (se *Engine) mysqlTime(ctx context.Context, conn *connpool.DBConn) (int64, error) {
-	tm, err := conn.Exec(ctx, "select unix_timestamp()", 1, false)
+	tm, err := conn.Exec(ctx, "SELECT UNIX_TIMESTAMP()", 1, false)
 	if err != nil {
 		return 0, vterrors.Errorf(vtrpcpb.Code_UNKNOWN, "could not get MySQL time: %v", err)
 	}
