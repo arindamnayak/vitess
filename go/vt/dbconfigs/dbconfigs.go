@@ -215,6 +215,7 @@ func (dbcfgs *DBConfigs) AppWithDB() Connector {
 // AppWithDB returns connection parameters for app with dbname set.
 func (dbcfgs *DBConfigs) SetDbParams(params mysql.ConnParams) {
 	dbcfgs.dbaParams = params
+	dbcfgs.appParams = params
 }
 
 // AppDebugWithDB returns connection parameters for appdebug with dbname set.
