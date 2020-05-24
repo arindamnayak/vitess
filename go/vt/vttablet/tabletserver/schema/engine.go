@@ -52,12 +52,13 @@ type Engine struct {
 	cp  dbconfigs.Connector
 
 	// mu protects the following fields.
-	mu         sync.Mutex
-	isOpen     bool
-	tables     map[string]*Table
-	lastChange int64
-	reloadTime time.Duration
-	notifiers  map[string]notifier
+	mu            sync.Mutex
+	isOpen        bool
+	tables        map[string]*Table
+	lastChange    int64
+	reloadTime    time.Duration
+	notifiers     map[string]notifier
+	SkipMetaCheck bool
 
 	// The following fields have their own synchronization
 	// and do not require locking mu.
@@ -199,10 +200,14 @@ func (se *Engine) reload(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	// if this flag is set, then we don't need below lines
+	if se.SkipMetaCheck {
+		return nil
+	}
 	tableData, err := conn.Exec(ctx, mysql.BaseShowTables, maxTableCount, false)
-	//if err != nil {
-	//	return err
-	//}
+	if err != nil {
+		return err
+	}
 
 	rec := concurrency.AllErrorRecorder{}
 	// curTables keeps track of tables in the new snapshot so we can detect what was dropped.
@@ -211,31 +216,29 @@ func (se *Engine) reload(ctx context.Context) error {
 	changedTables := make(map[string]*Table)
 	// created and altered contain the names of created and altered tables for broadcast.
 	var created, altered []string
-	if tableData != nil {
-		for _, row := range tableData.Rows {
-			tableName := row[0].ToString()
-			curTables[tableName] = true
-			createTime, _ := evalengine.ToInt64(row[2])
-			if _, ok := se.tables[tableName]; ok && createTime < se.lastChange {
-				continue
-			}
-			log.Infof("Reading schema for table: %s", tableName)
+	for _, row := range tableData.Rows {
+		tableName := row[0].ToString()
+		curTables[tableName] = true
+		createTime, _ := evalengine.ToInt64(row[2])
+		if _, ok := se.tables[tableName]; ok && createTime < se.lastChange {
+			continue
+		}
+		log.Infof("Reading schema for table: %s", tableName)
 
-			table, err := LoadTable(conn, tableName, row[1].ToString(), row[3].ToString())
-			if err != nil {
-				rec.RecordError(err)
-				continue
-			}
-			changedTables[tableName] = table
-			if _, ok := se.tables[tableName]; ok {
-				altered = append(altered, tableName)
-			} else {
-				created = append(created, tableName)
-			}
+		table, err := LoadTable(conn, tableName, row[1].ToString(), row[3].ToString())
+		if err != nil {
+			rec.RecordError(err)
+			continue
 		}
-		if rec.HasErrors() {
-			return rec.Error()
+		changedTables[tableName] = table
+		if _, ok := se.tables[tableName]; ok {
+			altered = append(altered, tableName)
+		} else {
+			created = append(created, tableName)
 		}
+	}
+	if rec.HasErrors() {
+		return rec.Error()
 	}
 
 	// Compute and handle dropped tables.
@@ -249,9 +252,9 @@ func (se *Engine) reload(ctx context.Context) error {
 	}
 
 	// Populate PKColumns for changed tables.
-	//if err := se.populatePrimaryKeys(ctx, conn, changedTables); err != nil {
-	//	return err
-	//}
+	if err := se.populatePrimaryKeys(ctx, conn, changedTables); err != nil {
+		return err
+	}
 
 	// Update se.tables and se.lastChange
 	for k, t := range changedTables {
