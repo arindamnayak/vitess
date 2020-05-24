@@ -65,13 +65,6 @@ func newExternalConnector(dbcfgs map[string]*dbconfigs.DBConfigs) *externalConne
 	}
 }
 
-func NewMysqlConnector(dbcfgs map[string]*dbconfigs.DBConfigs) *externalConnector {
-	return &externalConnector{
-		dbconfigs:  dbcfgs,
-		connectors: make(map[string]*mysqlConnector),
-	}
-}
-
 func (ec *externalConnector) Close() {
 	for _, c := range ec.connectors {
 		c.shutdown()
